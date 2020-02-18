@@ -23,7 +23,8 @@ from rango import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('rango/', include('rango.urls')),# URLs starting with rango/
+    path('rango/', include('rango.urls')),
+    # URLs starting with rango/
     #path('rango/about/', include('about.urls')),
     path('admin/', admin.site.urls),
 ]
