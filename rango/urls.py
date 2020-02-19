@@ -6,7 +6,7 @@
 """
 
 from django.urls import path
-#from django.urls import include
+from django.urls import include
 from rango import views
 
 app_name = 'rango'
