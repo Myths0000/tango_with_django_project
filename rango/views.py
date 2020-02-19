@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
 from rango.models import Category, Page
+from rango.forms import CategoryForm, PageForm
 
 def index(request):
     # "-" = descending order
@@ -37,3 +38,73 @@ def show_category(request, category_name_slug):
         context_dict['pages'] = None
     
     return render(request, 'rango/category.html', context=context_dict)
+
+def add_category(request):
+    form = CategoryForm()
+    
+    # check if the HTTP request was a POST (did the user submit data via the form)
+    # when submitting the contents of a HTML form
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        
+        if form.is_valid():
+            form.save(commit=True)
+            #cat = form.save(commit=True)
+            return redirect('/rango/')
+        else:
+            print(form.errors)
+            
+    return render(request, 'rango/add_category.html', {'form':form})
+
+def add_page(request, category_name_slug):
+    try:
+        category = Category.objects.get(slug=category_name_slug)
+    except Category.DoesNotExist:
+        category = None
+        
+    if category is None:
+        return redirect('/rango/')
+    
+    form = PageForm()
+    
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+        
+        if form.is_valid():
+            if category:
+                page = form.save(commit=False)
+                page.category = category
+                page.views = 0
+                page.save()
+                
+                return redirect(reverse('rango:show_category', kwargs={'category_name_slug':category_name_slug}))
+            
+        else:
+            print(form.errors)
+
+    # passes the category object through to the template
+    context_dict = {'form': form, 'category': category} 
+    return render(request, 'rango/add_page.html', context=context_dict)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
