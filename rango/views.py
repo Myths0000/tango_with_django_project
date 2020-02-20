@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
 from rango.models import Category, Page
-from rango.forms import CategoryForm, PageForm
+from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 
 def index(request):
     # "-" = descending order
@@ -76,9 +76,8 @@ def add_page(request, category_name_slug):
                 page.category = category
                 page.views = 0
                 page.save()
-                
                 return redirect(reverse('rango:show_category', kwargs={'category_name_slug':category_name_slug}))
-            
+
         else:
             print(form.errors)
 
@@ -86,11 +85,38 @@ def add_page(request, category_name_slug):
     context_dict = {'form': form, 'category': category} 
     return render(request, 'rango/add_page.html', context=context_dict)
         
+def register(request):
+    registered =False
+    
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+        profile_form = UserProfileForm(request.POST)
         
+        if user_form.is_valid() and profile_form.is_valid():
+            # save the user's form data to the database!!
+            user = user_form.save()
+            
+            # hash the password with the set_password method
+            user.set_password(user.password)
+            user.save()
+            
+            profile = profile_form.save(commit=False)
+            profile.user = user
+    
+            if 'picture' in request.FILES:
+                profile.picture = request.FILES['picture']
+                
+            profile.save()
+            registered = True
+        else:
+            print(user_forms.errors, profile_form.errors)
+    else:
+        # Not a HTTP POST, render our form using two ModelForm instances
+        user_form = UserForm()
+        profile_form = UserProfileForm()       
         
-        
-        
-        
+    context_dict = {'user_form': user_form, 'profile_form': profile_form, 'registered': registered}
+    return render(request, 'rango/register.html', context=context_dict)
         
         
         
