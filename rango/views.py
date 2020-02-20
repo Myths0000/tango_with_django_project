@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
 from rango.models import Category, Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
 def index(request):
@@ -26,7 +27,6 @@ def about(request):
     return render(request, 'rango/about.html')
 
 def show_category(request, category_name_slug):
-    
     context_dict = {}
     
     try:
@@ -41,6 +41,7 @@ def show_category(request, category_name_slug):
     
     return render(request, 'rango/category.html', context=context_dict)
 
+@login_required
 def add_category(request):
     form = CategoryForm()
     
@@ -58,6 +59,7 @@ def add_category(request):
             
     return render(request, 'rango/add_category.html', {'form':form})
 
+@login_required
 def add_page(request, category_name_slug):
     try:
         category = Category.objects.get(slug=category_name_slug)
@@ -79,7 +81,6 @@ def add_page(request, category_name_slug):
                 page.views = 0
                 page.save()
                 return redirect(reverse('rango:show_category', kwargs={'category_name_slug':category_name_slug}))
-
         else:
             print(form.errors)
 
@@ -111,7 +112,7 @@ def register(request):
             profile.save()
             registered = True
         else:
-            print(user_forms.errors, profile_form.errors)
+            print(user_form.errors, profile_form.errors)
     else:
         # Not a HTTP POST, render our form using two ModelForm instances
         user_form = UserForm()
@@ -140,8 +141,17 @@ def user_login(request):
         return render(request, 'rango/login.html')
         
         
-        
-        
+@login_required
+def restricted(request):
+    #return HttpResponse("Since you're logged in, you can see this text!")
+    context_dict = {}
+    context_dict['message']="Since you're logged in, you can see this text!"
+    return render(request, 'rango/restricted.html', context=context_dict)
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect(reverse('rango:index'))
         
         
         

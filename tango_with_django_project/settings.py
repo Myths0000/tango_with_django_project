@@ -111,6 +111,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_URL = 'rango:login'
+# login_required() decorator
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
