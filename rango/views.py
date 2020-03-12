@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from datetime import datetime
+from rango.bing_search import run_query
 
 def index(request):
     # "-" = descending order
@@ -141,3 +142,13 @@ def visitor_cookie_handler(request):
 
     #response.set_cookie('visits', visits)
     request.session['visits'] = visits
+
+def search(request):
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+
+    return render(request, 'rango/search.html', {'result_list': result_list, 'query': query})
